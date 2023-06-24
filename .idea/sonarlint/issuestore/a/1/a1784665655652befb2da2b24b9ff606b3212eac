@@ -1,0 +1,6 @@
+
+V	java:S107;"AConstructor has 8 parameters, which is greater than 7 authorized.(ªôÓÄ
+d
+java:S1128"NRemove this unused import 'com.fasterxml.jackson.annotation.JsonIdentityInfo'.(—éÑğ
+f
+java:S1128"PRemove this unused import 'com.fasterxml.jackson.annotation.ObjectIdGenerators'.(èîí
