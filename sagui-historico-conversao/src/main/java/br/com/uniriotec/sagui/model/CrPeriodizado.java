@@ -1,7 +1,9 @@
-package br.com.unirio.sagui.model;
+package br.com.uniriotec.sagui.model;
+
+import jakarta.persistence.*;
+import lombok.*;
 
 import java.io.Serializable;
-import javax.persistence.*;
 
 
 /**
@@ -11,6 +13,11 @@ import javax.persistence.*;
 @Entity
 @Table(name="cr_periodizado")
 @NamedQuery(name="CrPeriodizado.findAll", query="SELECT c FROM CrPeriodizado c")
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
+@Builder
 public class CrPeriodizado implements Serializable {
 	private static final long serialVersionUID = 1L;
 
@@ -32,59 +39,7 @@ public class CrPeriodizado implements Serializable {
 	private String periodo;
 
 	//bi-directional many-to-one association to Aluno
-	@ManyToOne(fetch=FetchType.LAZY, cascade = CascadeType.ALL)
+	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name="CR_P_ALUNO_FK", nullable=false)
 	private Aluno aluno;
-
-	public CrPeriodizado() {
-	}
-
-	public Long getCrPeriodizadoId() {
-		return this.crPeriodizadoId;
-	}
-
-	public void setCrPeriodizadoId(Long crPeriodizadoId) {
-		this.crPeriodizadoId = crPeriodizadoId;
-	}
-
-	public String getCargaCreditos() {
-		return this.cargaCreditos;
-	}
-
-	public void setCargaCreditos(String cargaCreditos) {
-		this.cargaCreditos = cargaCreditos;
-	}
-
-	public String getCargaHoraria() {
-		return this.cargaHoraria;
-	}
-
-	public void setCargaHoraria(String cargaHoraria) {
-		this.cargaHoraria = cargaHoraria;
-	}
-
-	public double getCr() {
-		return this.cr;
-	}
-
-	public void setCr(double cr) {
-		this.cr = cr;
-	}
-
-	public String getPeriodo() {
-		return this.periodo;
-	}
-
-	public void setPeriodo(String periodo) {
-		this.periodo = periodo;
-	}
-
-	public Aluno getAluno() {
-		return this.aluno;
-	}
-
-	public void setAluno(Aluno aluno) {
-		this.aluno = aluno;
-	}
-
 }

@@ -1,11 +1,10 @@
-package br.com.unirio.sagui.repository;
+package br.com.uniriotec.sagui.repository;
+
+import br.com.uniriotec.sagui.model.Svg;
+import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-
-import br.com.unirio.sagui.model.Svg;
-
 public interface SvgRepository extends JpaRepository<Svg, Long>{
-	public Optional<Svg> findByAlunoAlunoId(Long aluno_alunoId);
+	public Optional<Svg> findByAlunoAlunoId(Long aluno);
 }

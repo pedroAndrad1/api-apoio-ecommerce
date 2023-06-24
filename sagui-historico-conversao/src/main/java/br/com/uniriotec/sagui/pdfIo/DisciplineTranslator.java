@@ -1,7 +1,7 @@
-package br.com.unirio.sagui.quartz_jobs;
+package br.com.uniriotec.sagui.pdfIo;
 
-import lombok.Getter;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 
 @AllArgsConstructor
 public enum DisciplineTranslator {

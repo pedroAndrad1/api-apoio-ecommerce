@@ -1,30 +1,16 @@
-package br.com.unirio.sagui.model;
-
-import java.io.Serializable;
+package br.com.uniriotec.sagui.model;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
-
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import jakarta.persistence.*;
+import java.io.Serializable;
 import java.util.List;
 import java.util.Set;
-
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
 
 
 /**
@@ -34,7 +20,6 @@ import javax.persistence.Table;
 @Entity
 @Table(name="aluno")
 @NoArgsConstructor
-@JsonIdentityInfo(generator=ObjectIdGenerators.IntSequenceGenerator.class, property="@usuario_Id")
 public class Aluno implements Serializable {
 	private static final long serialVersionUID = 1L;
 
@@ -64,43 +49,43 @@ public class Aluno implements Serializable {
 	@Getter @Setter private String versaoGrade;
 	
 	//bi-directional many-to-one association to Usuario
-	@ManyToOne(fetch=FetchType.LAZY)
+	@ManyToOne
 	@JoinColumn(name="tutor_id")
 	@Getter @Setter private Usuario usuario;
 
 	//bi-directional many-to-one association to DisciplinaCursada
-	@OneToMany(mappedBy="aluno", cascade = CascadeType.ALL)
+	@OneToMany(mappedBy="aluno", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
 	@Getter @Setter private Set<DisciplinaCursada> disciplinaCursadas;
 
 	//bi-directional many-to-one association to ConfirmacaoMatricula
-	@OneToMany(mappedBy="aluno", cascade = CascadeType.ALL)
+	@OneToMany(mappedBy="aluno")
 	@Getter @Setter private Set<ConfirmacaoMatricula> confirmacaoMatriculas;
 
 	//bi-directional many-to-one association to CrPeriodizado
-	@OneToMany(mappedBy="aluno", cascade = CascadeType.ALL)
+	@OneToMany(mappedBy="aluno", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
 	@Getter @Setter private Set<CrPeriodizado> crPeriodizados;
 
 	//bi-directional many-to-one association to PlanoDeIntegralizacao
-	@OneToMany(mappedBy="aluno", cascade = CascadeType.ALL)
+	@OneToMany(mappedBy="aluno")
 	@Getter @Setter private Set<PlanoDeIntegralizacao> planoDeIntegralizacaos;
 
 	//bi-directional many-to-one association to RegrasAplicada
-	@OneToMany(mappedBy="aluno", fetch=FetchType.EAGER)
+	@OneToMany(mappedBy="aluno")
 	@Getter @Setter private Set<RegrasAplicada> regrasAplicadas;
 	
 	//uni-directional one-to-one association to Consolidaregra
-	@OneToOne(fetch=FetchType.EAGER)
+	@OneToOne
 	@JoinColumn(name="Aluno_Id", referencedColumnName="Aluno_Id")
 	@Getter @Setter private ConsolidaRegra consolidaregra;
 
 	
 	//bi-directional many-to-one association to Svg
-	@OneToMany(mappedBy="aluno", cascade = CascadeType.ALL)
-	@Getter @Setter private List<Svg> svg;
+	@OneToOne(mappedBy="aluno", cascade = CascadeType.ALL)
+	@Getter @Setter private Svg svg;
 
 	@Builder
 	public Aluno(Long aluno_Id, double cra, String curso, String email, String entradaAnoPeriodo, String matricula,
-			String nome, String versaoGrade, Set<RegrasAplicada> regrasAplicadas) {
+			String nome, String versaoGrade, Set<DisciplinaCursada> disciplinaCursadaSet, Set<CrPeriodizado> crPeriodizadoSet) {
 		super();
 		this.alunoId = aluno_Id;
 		this.cra = cra;
@@ -110,6 +95,7 @@ public class Aluno implements Serializable {
 		this.matricula = matricula;
 		this.nome = nome;
 		this.versaoGrade = versaoGrade;
-		this.regrasAplicadas = regrasAplicadas;
+		this.disciplinaCursadas = disciplinaCursadaSet;
+		this.crPeriodizados = crPeriodizadoSet;
 	}
 }

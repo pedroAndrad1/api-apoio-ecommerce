@@ -1,7 +1,7 @@
-package br.com.unirio.sagui.model;
+package br.com.uniriotec.sagui.model;
 
+import jakarta.persistence.*;
 import java.io.Serializable;
-import javax.persistence.*;
 
 
 /**

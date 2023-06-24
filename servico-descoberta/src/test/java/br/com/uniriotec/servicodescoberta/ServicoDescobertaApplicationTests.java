@@ -1,10 +1,10 @@
-package br.com.livrariareal.discoveryserver;
+package br.com.uniriotec.servicodescoberta;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class DiscoveryServerApplicationTests {
+class ServicoDescobertaApplicationTests {
 
 	@Test
 	void contextLoads() {

@@ -1,29 +1,13 @@
-package br.com.unirio.sagui.model;
-
-import java.io.Serializable;
-
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.NamedQuery;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-
-import org.springframework.data.domain.Persistable;
+package br.com.uniriotec.sagui.model;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import lombok.*;
+import org.springframework.data.domain.Persistable;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import jakarta.persistence.*;
+import java.io.Serializable;
 
 
 /**
@@ -34,7 +18,8 @@ import lombok.Setter;
 @Table(name="disciplina_cursada")
 @NamedQuery(name="DisciplinaCursada.findAll", query="SELECT d FROM DisciplinaCursada d")
 @NoArgsConstructor
-@JsonIdentityInfo(generator=ObjectIdGenerators.IntSequenceGenerator.class, property="@disciplina_Cursada_Id")
+@AllArgsConstructor
+@Builder
 public class DisciplinaCursada implements Serializable, Persistable<Long> {
 	private static final long serialVersionUID = 1L;
 
@@ -54,6 +39,7 @@ public class DisciplinaCursada implements Serializable, Persistable<Long> {
 
 	@Getter @Setter private double nota;
 
+	@Builder.Default
 	@Getter @Setter private int periodo = 99;
 
 	@Column(name="QTD_CURSADA", length=45)
@@ -75,13 +61,14 @@ public class DisciplinaCursada implements Serializable, Persistable<Long> {
 	@Getter @Setter private String versaoGrade;
 
 	//bi-directional many-to-one association to Aluno
-	@ManyToOne(fetch=FetchType.LAZY, cascade = CascadeType.ALL)
+	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name="DC_ALUNO_FK", nullable=false)
 	@JsonIgnore
 	@Getter @Setter private Aluno aluno;
 	
 	 @Transient
-	 @Getter @Setter private boolean update;
+	 @Builder.Default
+	 @Getter @Setter private boolean update = true;
 
 	@Override
 	public boolean isNew() {

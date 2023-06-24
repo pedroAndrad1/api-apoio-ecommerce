@@ -1,31 +1,16 @@
-package br.com.unirio.sagui.model;
+package br.com.uniriotec.sagui.model;
 
-import java.io.Serializable;
-
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import jakarta.persistence.*;
+import java.io.Serializable;
 import java.util.Date;
 import java.util.Set;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.NamedQuery;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-
-import org.springframework.hateoas.RepresentationModel;
-
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 
 /**
@@ -36,8 +21,7 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 @Table(name="usuario")
 @NamedQuery(name="Usuario.findAll", query="SELECT u FROM Usuario u")
 @NoArgsConstructor
-@JsonIdentityInfo(generator=ObjectIdGenerators.IntSequenceGenerator.class, property="@usuarioId")
-public class Usuario extends RepresentationModel<Usuario> implements Serializable {
+public class Usuario implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Id
@@ -71,14 +55,6 @@ public class Usuario extends RepresentationModel<Usuario> implements Serializabl
 	@OneToMany(mappedBy="usuario")
 	@Getter @Setter private Set<Aluno> alunos;
 
-	//bi-directional many-to-one association to Tutoria
-	@OneToMany(mappedBy="usuario", fetch=FetchType.EAGER)
-	@Getter @Setter private Set<Tutoria> tutorias;
-	
-	//bi-directional many-to-one association to UserRole
-	@OneToMany(mappedBy="usuario", fetch=FetchType.EAGER)
-	@Getter @Setter private Set<UserRole> userRoles;
-	
 	@Builder
 	public Usuario(Long usuarioId, String email, String nome, String oauthKey, String senha, int loginAttempts,
 			Date lastLogin, boolean enable) {

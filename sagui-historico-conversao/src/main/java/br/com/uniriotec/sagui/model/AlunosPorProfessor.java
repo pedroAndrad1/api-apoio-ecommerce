@@ -1,20 +1,12 @@
-package br.com.unirio.sagui.model;
-
-import java.io.Serializable;
-
-import org.springframework.data.annotation.Immutable;
+package br.com.uniriotec.sagui.model;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.data.annotation.Immutable;
 
-import java.math.BigInteger;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.NamedQuery;
-import javax.persistence.Table;
+import jakarta.persistence.*;
+import java.io.Serializable;
 
 /**
  * The persistent class for the alunos_por_professor database table.

@@ -1,14 +1,13 @@
-package br.com.unirio.sagui.model;
-
-import java.io.Serializable;
-import javax.persistence.*;
-
-import org.hibernate.annotations.Immutable;
+package br.com.uniriotec.sagui.model;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.Immutable;
+
+import jakarta.persistence.*;
+import java.io.Serializable;
 
 /**
  * The persistent class for the consolidaregras database table.

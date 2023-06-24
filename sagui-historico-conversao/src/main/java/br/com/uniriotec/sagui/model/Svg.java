@@ -1,12 +1,12 @@
-package br.com.unirio.sagui.model;
-
-import java.io.Serializable;
-import javax.persistence.*;
+package br.com.uniriotec.sagui.model;
 
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import jakarta.persistence.*;
+import java.io.Serializable;
 
 
 /**
@@ -24,7 +24,7 @@ public class Svg implements Serializable {
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	@Getter@Setter private Long sgvId;
 
-	@Lob
+	//@Lob
 	@Getter@Setter private String svg;
 
 	//bi-directional one-to-one association to Aluno

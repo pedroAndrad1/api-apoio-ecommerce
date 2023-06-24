@@ -1,4 +1,4 @@
-package br.com.unirio.sagui.svgIo;
+package br.com.uniriotec.sagui.svgio;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

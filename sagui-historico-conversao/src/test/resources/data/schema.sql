@@ -16,8 +16,23 @@
 
 
 -- Copiando estrutura do banco de dados para sagui
-CREATE DATABASE IF NOT EXISTS `sagui` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
+CREATE DATABASE IF NOT EXISTS `sagui` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */;
 USE `sagui`;
+
+-- Copiando estrutura para tabela sagui.usuario
+CREATE TABLE IF NOT EXISTS `usuario` (
+  `USUARIO_ID` bigint NOT NULL AUTO_INCREMENT,
+  `EMAIL` varchar(300) NOT NULL,
+  `NOME` varchar(300) DEFAULT NULL,
+  `OAUTH_KEY` varchar(500) DEFAULT NULL,
+  `SENHA` varchar(16) DEFAULT NULL,
+  `LAST_LOGIN` datetime DEFAULT NULL,
+  `enable` bit(1) DEFAULT NULL,
+  `LOGIN_ATTEMPTS` int DEFAULT NULL,
+  PRIMARY KEY (`USUARIO_ID`),
+  UNIQUE KEY `EMAIL_UNIQUE` (`EMAIL`),
+  UNIQUE KEY `OAUTH_KEY_UNIQUE` (`OAUTH_KEY`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- Copiando estrutura para tabela sagui.aluno
 CREATE TABLE IF NOT EXISTS `aluno` (
@@ -170,84 +185,6 @@ CREATE TABLE IF NOT EXISTS `disciplina_cursada` (
   CONSTRAINT `CD_ALUNO_FK` FOREIGN KEY (`DC_ALUNO_FK`) REFERENCES `aluno` (`Aluno_Id`) ON DELETE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-	
--- Copiando estrutura para função sagui.EM_SITUACAO_JUBILAMENTO
-DELIMITER //
-CREATE FUNCTION `EM_SITUACAO_JUBILAMENTO`( IN_ALUNO_ID INT ) RETURNS int
-    DETERMINISTIC
-BEGIN
-
-	DECLARE rCO_RE INT;
-
-	DECLARE rQTD INT;
-
-      SELECT (SUM(CR) / COUNT(CR)) INTO rCO_RE
-
-	  FROM CR_PERIODIZADO
-
-      WHERE CONCAT(SUBSTRING(PERIODO, 17, 20), SUBSTRING(PERIODO, 1, 1) ) <> GET_PERIODO_ATUAL() 
-
-      AND CR_P_ALUNO_FK = IN_ALUNO_ID;
-
-      
-
-      SELECT COUNT(QTD_REPROVACAO) INTO rQTD
-
-      FROM DISCIPLINA_CURSADA 
-
-      WHERE QTD_REPROVACAO > 3
-
-      AND DC_ALUNO_FK = IN_ALUNO_ID;
-
-      
-
-      IF ( rCO_RE < 4 AND rQTD > 3 ) THEN
-
-		RETURN 1;
-
-	  ELSE RETURN 0;
-
-      END IF;
-
-END//
-DELIMITER ;
-
--- Copiando estrutura para função sagui.GET_PERIODO
-DELIMITER //
-CREATE FUNCTION `GET_PERIODO`(IN_ALUNO_ID INT) RETURNS int
-    DETERMINISTIC
-BEGIN
-
-	DECLARE rPeriodo INT;
-
-	##Periodos
-
-	SELECT ( ( ( SELECT PERIODO_ID FROM PERIODOS WHERE PERIODO =  CONCAT(YEAR(SYSDATE()), CASE WHEN MONTH(SYSDATE()) <7 THEN 1 ELSE 2 END) ) -  PERIODO_ID ) +  1 ) as CountPeriodos into rPeriodo
-
-	FROM PERIODOS
-
-    WHERE PERIODO = (SELECT ENTRADA_ANO_PERIODO FROM ALUNO WHERE ALUNO_ID = IN_ALUNO_ID );
-
-	RETURN rPeriodo;
-
-END//
-DELIMITER ;
-
--- Copiando estrutura para função sagui.GET_PERIODO_ATUAL
-DELIMITER //
-CREATE FUNCTION `GET_PERIODO_ATUAL`() RETURNS int
-    DETERMINISTIC
-BEGIN
-
-	DECLARE rPeriodo INT;
-
-	SELECT CONCAT(YEAR(SYSDATE()), CASE WHEN MONTH(SYSDATE()) <7 THEN 1 ELSE 2 END) as Semestre INTO rPERIODO;
-
-	RETURN rPeriodo;
-
-END//
-DELIMITER ;
-
 -- Copiando estrutura para tabela sagui.grade
 CREATE TABLE IF NOT EXISTS `grade` (
   `GRADE_ID` bigint NOT NULL AUTO_INCREMENT,
@@ -370,171 +307,3 @@ CREATE TABLE IF NOT EXISTS `user_role` (
   KEY `CD_USUARIO_FK` (`USUARIO_ID`),
   KEY `CD_ROLE_FK` (`ROLE_ID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
--- Copiando dados para a tabela sagui.user_role: ~0 rows (aproximadamente)
-
--- Copiando estrutura para tabela sagui.usuario
-CREATE TABLE IF NOT EXISTS `usuario` (
-  `USUARIO_ID` bigint NOT NULL AUTO_INCREMENT,
-  `EMAIL` varchar(300) NOT NULL,
-  `NOME` varchar(300) DEFAULT NULL,
-  `OAUTH_KEY` varchar(500) DEFAULT NULL,
-  `SENHA` varchar(16) DEFAULT NULL,
-  `LAST_LOGIN` datetime DEFAULT NULL,
-  `enable` bit(1) DEFAULT NULL,
-  `LOGIN_ATTEMPTS` int DEFAULT NULL,
-  PRIMARY KEY (`USUARIO_ID`),
-  UNIQUE KEY `EMAIL_UNIQUE` (`EMAIL`),
-  UNIQUE KEY `OAUTH_KEY_UNIQUE` (`OAUTH_KEY`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
-
--- Copiando estrutura para trigger sagui.FixGradeFieldsInsert
-SET @OLDTMP_SQL_MODE=@@SQL_MODE, SQL_MODE='STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION';
-DELIMITER //
-CREATE TRIGGER `FixGradeFieldsInsert` BEFORE INSERT ON `disciplina_cursada` FOR EACH ROW BEGIN
-	declare flag integer;
-	declare flag2 integer;
-
-	-- Checa se a disciplina existe na tabela GRADE para o curso e código
-    SET flag := (SELECT COUNT(*) FROM GRADE WHERE CODIGO = new.CODIGO AND CURSO = new.CURSO); 
-    -- Checa se a disciplina existe na tabela GRADE para o código
-	SET flag2 := (SELECT COUNT(*) FROM GRADE WHERE CODIGO = new.CODIGO); 
--- Se a disciplina existe e é do curso passado então altera com o tipo. Obrigatória 
- IF (flag > 0) THEN    
-    SELECT NOME, CURSO, TIPO, VERSAO_GRADE, CREDITOS, PERIODO
-	INTO @inNome, @inCUrso, @inTipo, @inVersao_Grade, @inCreditos, @inPeriodos
-	FROM GRADE 
-	WHERE CODIGO = new.CODIGO
-    AND CURSO = new.CURSO;
-
-	SET new.TITULO = @inNome;
-	SET new.CURSO = @inCurso;
-	SET new.TIPO = @inTIpo;
-	SET new.VERSAO_GRADE = @inVersao_Grade;
-	SET new.CREDITOS = @inCreditos;
-	SET new.PERIODO = @inPeriodos;
-ELSEIF (flag2 > 0) THEN
-	SELECT NOME, CURSO, VERSAO_GRADE, CREDITOS, PERIODO
-	INTO @inNome, @inCUrso, @inVersao_Grade, @inCreditos, @inPeriodos
-	FROM GRADE 
-	WHERE CODIGO = new.CODIGO;
-    
-	SET new.TITULO = @inNome;
-	SET new.CURSO = @inCurso;
-	SET new.TIPO = '0004';
-	SET new.VERSAO_GRADE = @inVersao_Grade;
-	SET new.CREDITOS = @inCreditos;
-	SET new.PERIODO = @inPeriodos;
-ELSE 
-	SET new.TITULO = 'Não Cadastrado';
-	SET new.CURSO = 'N/A';
-	SET new.TIPO = '0004';
-	SET new.VERSAO_GRADE = 'N/A';
-	SET new.CREDITOS = 0;
-	SET new.PERIODO = 99;
-END IF;    
-END//
-DELIMITER ;
-SET SQL_MODE=@OLDTMP_SQL_MODE;
-
--- Copiando estrutura para trigger sagui.FixGradeFieldsUpdate
-SET @OLDTMP_SQL_MODE=@@SQL_MODE, SQL_MODE='STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION';
-DELIMITER //
-CREATE TRIGGER `FixGradeFieldsUpdate` BEFORE UPDATE ON `disciplina_cursada` FOR EACH ROW BEGIN
-	declare flag integer;
-	declare flag2 integer;
-
-	-- Checa se a disciplina existe na tabela GRADE para o curso e código
-    SET flag := (SELECT COUNT(*) FROM GRADE WHERE CODIGO = new.CODIGO AND CURSO = new.CURSO);
-    -- Checa se a disciplina existe na tabela GRADE para o código
-	SET flag2 := (SELECT COUNT(*) FROM GRADE WHERE CODIGO = new.CODIGO); 
-    
--- Se a disciplina existe e é do curso passado então altera com o tipo. Obrigatória 
- IF (flag > 0) THEN    
-    SELECT NOME, CURSO, TIPO, VERSAO_GRADE, CREDITOS, PERIODO
-	INTO @inNome, @inCUrso, @inTipo, @inVersao_Grade, @inCreditos, @inPeriodos
-	FROM GRADE 
-	WHERE CODIGO = new.CODIGO
-    AND CURSO = new.CURSO;
-
-	SET new.TITULO = @inNome;
-	SET new.CURSO = @inCurso;
-	SET new.TIPO = @inTIpo;
-	SET new.VERSAO_GRADE = @inVersao_Grade;
-	SET new.CREDITOS = @inCreditos;
-	SET new.PERIODO = @inPeriodos;
-ELSEIF (flag2 > 0) THEN
-	SELECT NOME, CURSO, VERSAO_GRADE, CREDITOS, PERIODO
-	INTO @inNome, @inCUrso, @inVersao_Grade, @inCreditos, @inPeriodos
-	FROM GRADE 
-	WHERE CODIGO = new.CODIGO;
-    
-	SET new.TITULO = @inNome;
-	SET new.CURSO = @inCurso;
-	SET new.TIPO = '0004';
-	SET new.VERSAO_GRADE = @inVersao_Grade;
-	SET new.CREDITOS = @inCreditos;
-	SET new.PERIODO = @inPeriodos;
-ELSE 
-	SET new.TITULO = 'Não Cadastrado';
-	SET new.CURSO = 'N/A';
-	SET new.TIPO = '0004';
-	SET new.VERSAO_GRADE = 'N/A';
-	SET new.CREDITOS = 0;
-	SET new.PERIODO = 99;
-END IF;    
-END//
-DELIMITER ;
-SET SQL_MODE=@OLDTMP_SQL_MODE;
-
--- Copiando estrutura para view sagui.alunos_por_professor
--- Removendo tabela temporária e criando a estrutura VIEW final
-DROP TABLE IF EXISTS `alunos_por_professor`;
-CREATE ALGORITHM=UNDEFINED SQL SECURITY DEFINER VIEW `alunos_por_professor` AS select `a`.`USUARIO_ID` AS `usuario_id`,`a`.`NOME` AS `NOME`,`a`.`EMAIL` AS `email`,`b`.`PERIODO_TUTOR` AS `PERIODO_TUTOR`,`c`.`Aluno_Id` AS `Aluno_Id`,`c`.`NOME_ALUNO` AS `nome_aluno`,`c`.`Matricula` AS `matricula` from ((`usuario` `a` join `tutoria` `b`) join `aluno` `c`) where ((`a`.`USUARIO_ID` = `b`.`TUTOR_USUARIO_FK`) and (`b`.`PERIODO_TUTOR` = `c`.`Entrada_Ano_Periodo`));
-
--- Copiando estrutura para view sagui.carga_horaria_comp_ext
--- Removendo tabela temporária e criando a estrutura VIEW final
-DROP TABLE IF EXISTS `carga_horaria_comp_ext`;
-CREATE ALGORITHM=UNDEFINED SQL SECURITY DEFINER VIEW `carga_horaria_comp_ext` AS select `a`.`Aluno_Id` AS `ALUNO_ID`,`a`.`NOME_ALUNO` AS `NOME_ALUNO`,count(`d`.`CODIGO`) AS `QTD`,(case when (count(`d`.`CODIGO`) = 0) then 'TRUE' else 'FALSE' end) AS `SEM_ATIVIDADE_EXTENSIONISTA`,`a`.`Entrada_Ano_Periodo` AS `ANO_ENTRADA`,`GET_PERIODO`(`a`.`Aluno_Id`) AS `QTD_PERIODOS` from (`aluno` `a` left join `disciplina_cursada` `d` on(((`d`.`DC_ALUNO_FK` = `a`.`Aluno_Id`) and (upper(`d`.`TITULO`) like '%EXTENSÃO%') and (`d`.`SITUACAO` = 'Aprovado')))) group by `a`.`Aluno_Id`,`a`.`NOME_ALUNO`;
-
--- Copiando estrutura para view sagui.carga_horaria_eletiva
--- Removendo tabela temporária e criando a estrutura VIEW final
-DROP TABLE IF EXISTS `carga_horaria_eletiva`;
-CREATE ALGORITHM=UNDEFINED SQL SECURITY DEFINER VIEW `carga_horaria_eletiva` AS select `a`.`Aluno_Id` AS `ALUNO_ID`,`a`.`NOME_ALUNO` AS `NOME_ALUNO`,count(`d`.`CODIGO`) AS `QTD`,(case when (count(`d`.`CODIGO`) = 0) then 'TRUE' else 'FALSE' end) AS `SEM_ELETIVA`,`a`.`Entrada_Ano_Periodo` AS `ANO_ENTRADA`,`GET_PERIODO`(`a`.`Aluno_Id`) AS `QTD_PERIODOS` from (`aluno` `a` join `disciplina_cursada` `d`) where ((`a`.`Aluno_Id` = `d`.`DC_ALUNO_FK`) and ((`d`.`CURSO` <> `a`.`Curso`) or (`d`.`CURSO` is null))) group by `a`.`Aluno_Id`,`a`.`NOME_ALUNO`;
-
--- Copiando estrutura para view sagui.carga_horaria_optativa
--- Removendo tabela temporária e criando a estrutura VIEW final
-DROP TABLE IF EXISTS `carga_horaria_optativa`;
-CREATE ALGORITHM=UNDEFINED SQL SECURITY DEFINER VIEW `carga_horaria_optativa` AS select `a`.`Aluno_Id` AS `ALUNO_ID`,`a`.`NOME_ALUNO` AS `NOME_ALUNO`,count(`d`.`CODIGO`) AS `QTD`,(case when (count(`d`.`CODIGO`) = 0) then 'TRUE' else 'FALSE' end) AS `SEM_OPTATIVA`,`a`.`Entrada_Ano_Periodo` AS `ANO_ENTRADA`,`GET_PERIODO`(`a`.`Aluno_Id`) AS `QTD_PERIODOS` from (`aluno` `a` left join `disciplina_cursada` `d` on(((`a`.`Aluno_Id` = `d`.`DC_ALUNO_FK`) and (`d`.`TIPO` = '0002') and (`d`.`SITUACAO` = 'Aprovado')))) group by `a`.`Aluno_Id`,`a`.`NOME_ALUNO`;
-
--- Copiando estrutura para view sagui.consolidaregras
--- Removendo tabela temporária e criando a estrutura VIEW final
-DROP TABLE IF EXISTS `consolidaregras`;
-CREATE ALGORITHM=UNDEFINED SQL SECURITY DEFINER VIEW `consolidaregras` AS select `aluno`.`Aluno_Id` AS `Aluno_Id`,`aluno`.`NOME_ALUNO` AS `NOME_ALUNO`,(select `a`.`QTD` from `carga_horaria_comp_ext` `a` where (`a`.`ALUNO_ID` = `aluno`.`Aluno_Id`)) AS `QTD_CHCE`,(select `a`.`SEM_ATIVIDADE_EXTENSIONISTA` from `carga_horaria_comp_ext` `a` where (`a`.`ALUNO_ID` = `aluno`.`Aluno_Id`)) AS `SEM_ATIVIDADE_EXTENSIONISTA_CHCE`,(select `a`.`ANO_ENTRADA` from `carga_horaria_comp_ext` `a` where (`a`.`ALUNO_ID` = `aluno`.`Aluno_Id`)) AS `ANO_ENTRADA_CHCE`,(select `a`.`QTD_PERIODOS` from `carga_horaria_comp_ext` `a` where (`a`.`ALUNO_ID` = `aluno`.`Aluno_Id`)) AS `QTD_PERIODOS_CHCE`,(case when ((select `b`.`QTD` from `carga_horaria_eletiva` `b` where (`b`.`ALUNO_ID` = `aluno`.`Aluno_Id`)) is null) then 0 else (select `b`.`QTD` from `carga_horaria_eletiva` `b` where (`b`.`ALUNO_ID` = `aluno`.`Aluno_Id`)) end) AS `QTD_CHE`,(case when ((select `b`.`SEM_ELETIVA` from `carga_horaria_eletiva` `b` where (`b`.`ALUNO_ID` = `aluno`.`Aluno_Id`)) is null) then 'TRUE' else (select `b`.`SEM_ELETIVA` from `carga_horaria_eletiva` `b` where (`b`.`ALUNO_ID` = `aluno`.`Aluno_Id`)) end) AS `SEM_ELETIVA_CHE`,(select `a`.`QTD` from `carga_horaria_optativa` `a` where (`a`.`ALUNO_ID` = `aluno`.`Aluno_Id`)) AS `QTD_CHO`,(select `a`.`SEM_OPTATIVA` from `carga_horaria_optativa` `a` where (`a`.`ALUNO_ID` = `aluno`.`Aluno_Id`)) AS `SEM_OPTATIVA_CHO`,(case when ((select `b`.`DC_ALUNO_FK` from `consta_reprovacao` `b` where (`b`.`DC_ALUNO_FK` = `aluno`.`Aluno_Id`)) is null) then 'FALSE' else 'TRUE' end) AS `SOMENTE_REP`,(case when ((select `b`.`ALUNO_ID` from `limite_reprovacoes_atingido` `b` where (`b`.`ALUNO_ID` = `aluno`.`Aluno_Id`)) is null) then 'FALSE' else 'TRUE' end) AS `LIMITE_REP`,(select `a`.`QTD` from `mais_que_50_por_cento` `a` where (`a`.`ALUNO_ID` = `aluno`.`Aluno_Id`)) AS `QTD_MQ5P`,(select `a`.`50_PER_CENT_CURSADO` from `mais_que_50_por_cento` `a` where (`a`.`ALUNO_ID` = `aluno`.`Aluno_Id`)) AS `MAIS_MQ5P`,(case when ((select `b`.`ALUNO_ID` from `trancamentos_gerais_atingido` `b` where (`b`.`ALUNO_ID` = `aluno`.`Aluno_Id`)) is null) then 'FALSE' else 'TRUE' end) AS `TRT_GERAL`,(select sum(`a`.`CR`) from `cr_periodizado` `a` where (`a`.`CR_P_ALUNO_FK` = `aluno`.`Aluno_Id`) group by `a`.`CR_P_ALUNO_FK`) AS `SOMA_PERIODIZADO`,(select (sum(`a`.`CR`) / count(`a`.`CR_P_ALUNO_FK`)) from `cr_periodizado` `a` where (`a`.`CR_P_ALUNO_FK` = `aluno`.`Aluno_Id`) group by `a`.`CR_P_ALUNO_FK`) AS `CRA` from `aluno`;
-
--- Copiando estrutura para view sagui.consta_reprovacao
--- Removendo tabela temporária e criando a estrutura VIEW final
-DROP TABLE IF EXISTS `consta_reprovacao`;
-CREATE ALGORITHM=UNDEFINED SQL SECURITY DEFINER VIEW `consta_reprovacao` AS select `disciplina_cursada`.`DC_ALUNO_FK` AS `DC_ALUNO_FK` from `disciplina_cursada` where ((`disciplina_cursada`.`SITUACAO` = 'Reprovado') and `disciplina_cursada`.`DC_ALUNO_FK` in (select `disciplina_cursada`.`DC_ALUNO_FK` from `disciplina_cursada` where (`disciplina_cursada`.`SITUACAO` = 'Aprovado') group by `disciplina_cursada`.`DC_ALUNO_FK`) is false) group by `disciplina_cursada`.`DC_ALUNO_FK`;
-
--- Copiando estrutura para view sagui.limite_reprovacoes_atingido
--- Removendo tabela temporária e criando a estrutura VIEW final
-DROP TABLE IF EXISTS `limite_reprovacoes_atingido`;
-CREATE ALGORITHM=UNDEFINED SQL SECURITY DEFINER VIEW `limite_reprovacoes_atingido` AS select `a`.`Aluno_Id` AS `ALUNO_ID`,`a`.`NOME_ALUNO` AS `NOME_ALUNO`,`d`.`QTD_REPROVACAO` AS `QTD_REPROVACAO` from (`aluno` `a` join `disciplina_cursada` `d`) where ((`a`.`Aluno_Id` = `d`.`DC_ALUNO_FK`) and (`d`.`QTD_REPROVACAO` > 3)) group by `a`.`NOME_ALUNO`;
-
--- Copiando estrutura para view sagui.mais_que_50_por_cento
--- Removendo tabela temporária e criando a estrutura VIEW final
-DROP TABLE IF EXISTS `mais_que_50_por_cento`;
-CREATE ALGORITHM=UNDEFINED SQL SECURITY DEFINER VIEW `mais_que_50_por_cento` AS select `alunos`.`ALUNO_ID` AS `ALUNO_ID`,`alunos`.`NOME_ALUNO` AS `NOME_ALUNO`,`alunos`.`CURSO` AS `CURSO`,`alunos`.`QTD` AS `QTD`,`alunos`.`ANO_ENTRADA` AS `ANO_ENTRADA`,`alunos`.`QTD_PERIODOS` AS `QTD_PERIODOS`,`alunos`.`50_PER_CENT_CURSADO` AS `50_PER_CENT_CURSADO` from (select `a`.`Aluno_Id` AS `ALUNO_ID`,`a`.`NOME_ALUNO` AS `NOME_ALUNO`,`a`.`Curso` AS `CURSO`,count(`d`.`CODIGO`) AS `QTD`,`a`.`Entrada_Ano_Periodo` AS `ANO_ENTRADA`,`GET_PERIODO`(`a`.`Aluno_Id`) AS `QTD_PERIODOS`,(case when (((select `disciplinas_periodo`.`PERIODO` from `disciplinas_periodo` where ((`disciplinas_periodo`.`CURSO` = `a`.`Curso`) and (`disciplinas_periodo`.`IS_50_PER_CENT` = 'TRUE'))) <= `GET_PERIODO`(`a`.`Aluno_Id`)) and ((select `disciplinas_periodo`.`SOMATORIO` from `disciplinas_periodo` where ((`disciplinas_periodo`.`CURSO` = `a`.`Curso`) and (`disciplinas_periodo`.`IS_50_PER_CENT` = 'TRUE'))) > count(`d`.`CODIGO`))) then 'Menos de 50%' else 'Mais de 50%' end) AS `50_PER_CENT_CURSADO` from (`aluno` `a` join `disciplina_cursada` `d`) where ((`a`.`Aluno_Id` = `d`.`DC_ALUNO_FK`) and (`d`.`SITUACAO` = 'Aprovado')) group by `a`.`Aluno_Id`,`a`.`NOME_ALUNO`) `alunos` where (`alunos`.`QTD_PERIODOS` >= (select `disciplinas_periodo`.`PERIODO` from `disciplinas_periodo` where ((`disciplinas_periodo`.`CURSO` = `alunos`.`CURSO`) and (`disciplinas_periodo`.`IS_50_PER_CENT` = 'TRUE'))));
-
--- Copiando estrutura para view sagui.trancamentos_gerais_atingido
--- Removendo tabela temporária e criando a estrutura VIEW final
-DROP TABLE IF EXISTS `trancamentos_gerais_atingido`;
-CREATE ALGORITHM=UNDEFINED SQL SECURITY DEFINER VIEW `trancamentos_gerais_atingido` AS select `a`.`Aluno_Id` AS `ALUNO_ID`,`a`.`NOME_ALUNO` AS `NOME_ALUNO`,`d`.`CODIGO` AS `CODIGO`,`d`.`QTD_CURSADA` AS `QTD_CURSADA` from (`aluno` `a` join `disciplina_cursada` `d`) where ((`a`.`Aluno_Id` = `d`.`DC_ALUNO_FK`) and (`d`.`CODIGO` like 'TRT%') and (`d`.`QTD_CURSADA` > 3));
-
-/*!40103 SET TIME_ZONE=IFNULL(@OLD_TIME_ZONE, 'system') */;
-/*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;
-/*!40014 SET FOREIGN_KEY_CHECKS=IFNULL(@OLD_FOREIGN_KEY_CHECKS, 1) */;
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40111 SET SQL_NOTES=IFNULL(@OLD_SQL_NOTES, 1) */;

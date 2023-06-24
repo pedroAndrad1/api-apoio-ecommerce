@@ -1,8 +1,10 @@
-package br.com.unirio.sagui.svgIo;
+package br.com.uniriotec.sagui.svgio;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.StringWriter;
+import lombok.extern.slf4j.Slf4j;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -13,13 +15,10 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
-
-import lombok.extern.slf4j.Slf4j;
+import javax.xml.XMLConstants;
+import java.io.File;
+import java.io.IOException;
+import java.io.StringWriter;
 
 @Slf4j
 public class SvgIo {
@@ -35,7 +34,11 @@ public class SvgIo {
 		try {
 			File file = new File(fileName);
 			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-			dbFactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+
+			//dbFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+			//dbFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+			dbFactory.setExpandEntityReferences(false);
+
 			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
 			Document document = dBuilder.parse(file);
 			document.getDocumentElement().normalize();
@@ -69,12 +72,14 @@ public class SvgIo {
 		StringWriter writer = new StringWriter();
 		StreamResult result = new StreamResult(writer);
 		TransformerFactory tf = TransformerFactory.newInstance();
-		try {
-			tf.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
-		} catch (TransformerConfigurationException e) {
-			e.printStackTrace();
-			log.info("Impossível abrir o svg. Não foi possível desabilitar o doctype");
-		}
+
+		//try {
+			//tf.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+		//} catch (TransformerConfigurationException e) {
+			//log.info("Imposssivel abriri o svg");
+		//}
+		//tf.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+
 		Transformer transformer;
 		try {
 			transformer = tf.newTransformer();
