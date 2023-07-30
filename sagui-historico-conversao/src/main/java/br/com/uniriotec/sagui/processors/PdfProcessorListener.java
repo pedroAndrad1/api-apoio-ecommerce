@@ -45,7 +45,7 @@ public class PdfProcessorListener {
      */
     @KafkaListener(topics = "placed_records", groupId = "recordsId")
     public void execute( String studentRecordArchiveName ) throws IOException {
-        log.info( "Procerssamento de histórico iniciado ás {}", LocalDateTime.now());
+        log.info( "Processamento de histórico iniciado ás {}", LocalDateTime.now());
         try ( DirectoryStream<Path> paths = Files.newDirectoryStream(Paths.get(fileStorageProperties.getUploadDir()).toAbsolutePath().normalize()
                     , path -> path.toString().endsWith(".pdf")) ){
             paths.forEach( file -> {

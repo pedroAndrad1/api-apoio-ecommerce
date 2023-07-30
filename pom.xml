@@ -18,6 +18,10 @@
         <module>sagui-historico-conversao</module>
         <module>servico-configuracao</module>
         <module>servico-descoberta</module>
+        <module>servico-produto</module>
+        <module>servico-pedidos</module>
+        <module>servico-inventario</module>
+        <module>servico-produto-sc</module>
     </modules>
 
     <properties>
