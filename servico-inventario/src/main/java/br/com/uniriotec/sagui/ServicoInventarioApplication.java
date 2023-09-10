@@ -1,6 +1,7 @@
 package br.com.uniriotec.sagui;
 
 import br.com.uniriotec.sagui.Repository.InventarioRepositorio;
+import br.com.uniriotec.sagui.model.Inventario;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.info.Info;
 import lombok.extern.slf4j.Slf4j;
@@ -43,7 +44,7 @@ public class ServicoInventarioApplication {
 							.skuCode("9780939173343")
 							.quantity(0)
 							.build()
-			);*/
+			);**/
 			List<String> skuCodes = Arrays.asList("9780939173341", "9780939173342");
 			log.info( "Valor do count" +  inventarioRepositorio.countBySkuCodeInAndQuantityGreaterThan( skuCodes, 0L ) );
 		};

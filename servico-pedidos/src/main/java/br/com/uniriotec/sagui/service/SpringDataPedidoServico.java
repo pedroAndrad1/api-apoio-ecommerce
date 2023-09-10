@@ -7,6 +7,7 @@ import br.com.uniriotec.sagui.model.dto.PedidoData;
 import br.com.uniriotec.sagui.model.dto.PedidoRepresentationAssembler;
 import br.com.uniriotec.sagui.repository.PedidoRepositorio;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
 import io.github.resilience4j.timelimiter.annotation.TimeLimiter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,10 +21,10 @@ import java.util.concurrent.CompletableFuture;
 @Transactional
 public class SpringDataPedidoServico implements PedidoServico {
 
-    private PedidoRepositorio pedidoRepositorio;
-    private PedidoRepresentationAssembler pedidoRepresentationAssembler;
-    private LinhaItemPedidoRepresentationAssembler itemPedidoRepresentationAssembler;
-    private WebClient.Builder webClientBuilder;
+    private final PedidoRepositorio pedidoRepositorio;
+    private final PedidoRepresentationAssembler pedidoRepresentationAssembler;
+    private final LinhaItemPedidoRepresentationAssembler itemPedidoRepresentationAssembler;
+    private final WebClient.Builder webClientBuilder;
 
     private static final String SALVAR_PEDIDO_CB_NOME = "pedidos";
 
@@ -39,7 +40,7 @@ public class SpringDataPedidoServico implements PedidoServico {
     @Override
     @CircuitBreaker(name = SALVAR_PEDIDO_CB_NOME, fallbackMethod = "pedidosFallBack")
     @TimeLimiter( name = SALVAR_PEDIDO_CB_NOME )
-    //@Retry( name = SALVAR_PEDIDO_CB_NOME )
+    @Retry( name = SALVAR_PEDIDO_CB_NOME )
     public CompletableFuture<PedidoData> salvarPedido(PedidoData pedidoData){
         //Transforma pedidoData em classe anotada para persistencia pedido
         Pedido pedido = pedidoRepresentationAssembler.mapToPersistence(pedidoData);
@@ -56,11 +57,15 @@ public class SpringDataPedidoServico implements PedidoServico {
                 .bodyToMono( Long.class )
                 .block();
         //Salva o pedido caso o Long retornado da chamada à inventário seja igual ao tamanho da lista de produtos
-        if( resultado == codigosSku.size() ){
-            pedido = pedidoRepositorio.save(pedido);
-            //todo chamada assincrona a inventário pra recurerar qual item do pedido está fora de estoque
-        }else{
-            throw new IllegalArgumentException("Foram pedidos " + codigosSku.size() + " produtos e " + ( codigosSku.size() - resultado ) + " deles não estão em estoque");
+        try{
+            if( resultado == codigosSku.size() ){
+                pedido = pedidoRepositorio.save(pedido);
+                //todo chamada assincrona a inventário pra recurerar qual item do pedido está fora de estoque
+            }else{
+                throw new IllegalArgumentException("Foram pedidos " + codigosSku.size() + " produtos e " + ( codigosSku.size() - resultado ) + " deles não estão em estoque");
+            }
+        }catch(NullPointerException e){
+            throw new IllegalArgumentException("A lista de SKUs não retornou quantidade nulla, favor contatar o suporte");
         }
         final PedidoData pedidoDataCF = pedidoRepresentationAssembler.toModel(pedido);
         return CompletableFuture.supplyAsync( () -> pedidoDataCF) ;

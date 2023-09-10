@@ -5,6 +5,10 @@ import org.springframework.hateoas.CollectionModel;
 
 import br.com.uniriotec.sagui.model.dto.ProdutoForm;
 
+/**
+ * @Author JCSouza
+ * Interface de serviço de produto
+ */
 public interface ProdutoServico {
 
 	ProdutoData buscarPorId(String id);

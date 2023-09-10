@@ -15,12 +15,12 @@ import java.util.concurrent.CompletableFuture;
 
 @RestController
 @RequestMapping("/pedidos")
-@CrossOrigin(origins = {"http://localhost:8080","http://localhost:3000"})
+@CrossOrigin
 public class PedidoControlador {
 
-    private PedidoRepositorio pedidoRepositorio;
-    private  PedidoRepresentationAssembler pedidoRepresentationAssembler;
-    private PedidoServico pedidoServico;
+    private final PedidoRepositorio pedidoRepositorio;
+    private final PedidoRepresentationAssembler pedidoRepresentationAssembler;
+    private final PedidoServico pedidoServico;
 
     @Autowired
     public PedidoControlador(PedidoRepositorio pedidoRepositorio,
@@ -38,8 +38,9 @@ public class PedidoControlador {
     }
 
     @PostMapping
-    public ResponseEntity<CompletableFuture<PedidoData>> geraPedido(@RequestBody PedidoData pedidoData){
-        return ResponseEntity.status(HttpStatus.CREATED).body( pedidoServico.salvarPedido(pedidoData) );
+    @ResponseStatus(HttpStatus.CREATED)
+    public CompletableFuture<PedidoData> geraPedido(@RequestBody PedidoData pedidoData){
+        return pedidoServico.salvarPedido(pedidoData);
     }
 
 }

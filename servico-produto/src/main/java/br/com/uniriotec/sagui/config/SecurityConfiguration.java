@@ -2,6 +2,7 @@ package br.com.uniriotec.sagui.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
@@ -22,18 +23,25 @@ import java.util.stream.Collectors;
 
 @Configuration
 @EnableMethodSecurity
+@Profile(value = {"dev", "hml", "prod","test"})
 public class SecurityConfiguration{
+    public static final String PRODUTOS_URL_BASE = "/produtos/**";
+    public static final String PRODUTO_ADMIN_WRITE_ROLE = "Produto_Admin_Write";
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity.csrf().disable()
                 .authorizeHttpRequests( request -> request
-                        //.requestMatchers("/v3/api-docs").permitAll()
-                        .requestMatchers( HttpMethod.GET, "/produtos/admin").authenticated()
+                        .requestMatchers("/v3/api-docs/**").permitAll()
+                        .requestMatchers( HttpMethod.GET, "/produtos/admin").hasRole("Produto_Admin_Read")
+                        .requestMatchers(HttpMethod.POST, PRODUTOS_URL_BASE).hasRole(PRODUTO_ADMIN_WRITE_ROLE)
+                        .requestMatchers(HttpMethod.PATCH, PRODUTOS_URL_BASE).hasRole(PRODUTO_ADMIN_WRITE_ROLE)
+                        .requestMatchers(HttpMethod.PUT, PRODUTOS_URL_BASE).hasRole(PRODUTO_ADMIN_WRITE_ROLE)
+
                         .anyRequest().permitAll()
                 )
                 .cors().configurationSource( request -> {
                     CorsConfiguration configuration = new CorsConfiguration();
-                    configuration.setAllowedOrigins(List.of("http://localhost:3000", "http://localhost:8080"));
+                    configuration.setAllowedOrigins(List.of("*"));
                     configuration.setAllowedMethods(List.of("*"));
                     configuration.setAllowedHeaders(List.of("*"));
                     return configuration;

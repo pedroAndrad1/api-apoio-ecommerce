@@ -43,7 +43,27 @@ public class ProdutoRepresentationAssembler implements RepresentationModelAssemb
 	public CollectionModel<ProdutoData> toCollectionModel(Iterable<? extends Produto> entities) {
 		return RepresentationModelAssembler.super.toCollectionModel(entities);
 	}
-	
-	
-	
+
+	public Produto toEntity(ProdutoData model){
+		return Produto.builder()
+				.id( model.getId() )
+				.nome( model.getNome() )
+				.descricao( model.getDescricao() )
+				.preco( model.getPreco() )
+				.tipo( model.getTipo() )
+				.imageUrl( model.getImageUrl() )
+				.ativo( model.isAtivo() )
+				.build();
+	}
+	public Produto fromFormToModel(ProdutoForm model){
+		return Produto.builder()
+				.id( model.getId() )
+				.nome( model.getNome() )
+				.descricao( model.getDescricao() )
+				.preco( model.getPreco() )
+				.tipo( model.getTipo() )
+				.imageUrl( model.getImageUrl() )
+				.ativo( model.getAtivo() )
+				.build();
+	}
 }

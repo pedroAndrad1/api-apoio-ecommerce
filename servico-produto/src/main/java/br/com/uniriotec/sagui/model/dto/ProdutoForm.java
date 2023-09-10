@@ -25,11 +25,11 @@ public class ProdutoForm {
 	@Getter @Setter private String nome;
 	@Size(min = 0, max = 2000, message = "{form.produto.descricao.max}")
 	@Getter @Setter private String descricao;
-	@Min(0)
+	@Min(value = 0, message = "{form.produto.preco.min}")
 	@Getter @Setter private BigDecimal preco;
-	//tipo
+	//Lista de tipo do produto
 	@Getter @Setter private List<String> tipo;
-	//imagem
+	//Url da imagem do produto
 	@Getter @Setter private String imageUrl;
 	@NotNull(message="{form.produto.is.valid}")
 	@Getter @Setter private Boolean ativo;

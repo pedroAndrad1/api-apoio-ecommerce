@@ -1,17 +1,22 @@
 package br.com.uniriotec.sagui.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
+import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.ReactiveJwtDecoder;
+import org.springframework.security.oauth2.jwt.ReactiveJwtDecoders;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.ReactiveJwtAuthenticationConverterAdapter;
 import org.springframework.security.web.server.SecurityWebFilterChain;
+import org.springframework.web.cors.CorsConfiguration;
 import reactor.core.publisher.Mono;
 
 import java.util.Collection;
@@ -29,6 +34,8 @@ import java.util.stream.Collectors;
 @Configuration
 @EnableWebFluxSecurity
 public class SecurityConfiguration {
+    @Value("${spring.security.oauth2.resourceserver.jwt.issuer-uri}")
+    private String KeycloakUrl;
     /**
      * Permite acesso não logado ao Eureka Client e habilita a autenticação para as rotas expostas pelo api gateway
      * @param serverHttpSecurity
@@ -36,17 +43,29 @@ public class SecurityConfiguration {
      */
     @Bean
     public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity serverHttpSecurity){
-        serverHttpSecurity//.anonymous().and()
+        serverHttpSecurity
                 .csrf().disable()
-                .authorizeExchange( exchange -> exchange.pathMatchers(  "/eureka/**","/eureka/web" ).permitAll()
+                .authorizeExchange( exchange -> exchange
                         .anyExchange()
-                                .permitAll()
-                        //.authenticated()
+                        .authenticated()
                 )
+                .cors().configurationSource( request -> {
+                    CorsConfiguration configuration = new CorsConfiguration();
+                    configuration.setAllowedOrigins(List.of("*"));
+                    configuration.setAllowedMethods(List.of("*"));
+                    configuration.setAllowedHeaders(List.of("*"));
+                    return configuration;
+                }).and()
                 .oauth2ResourceServer( oauth2 -> oauth2
                         .jwt( jwt -> jwt.jwtAuthenticationConverter( grantedAuthoritiesExtractor() ))
                 );
         return serverHttpSecurity.build();
+    }
+
+    @Bean
+    public ReactiveJwtDecoder jwtDecoder() {
+        //essa propriedade precisa ser pega do config.
+        return ReactiveJwtDecoders.fromIssuerLocation(KeycloakUrl);
     }
 
     /**

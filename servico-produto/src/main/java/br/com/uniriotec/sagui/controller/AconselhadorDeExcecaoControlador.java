@@ -66,6 +66,13 @@ public class AconselhadorDeExcecaoControlador {
 				.details( request.getDescription(false))
 				.build());
 	}
+
+	/**
+	 * Trata chamadas da API que geram erro de chave duplicada. O item já existe no banco.
+	 * @param exception
+	 * @param request
+	 * @return
+	 */
 	@ExceptionHandler(DuplicateKeyException.class)
 	public final ResponseEntity<ExcecaoResposta> handleDuplicateKeyException(DuplicateKeyException exception, WebRequest request ) {
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body( ExcecaoResposta.builder()

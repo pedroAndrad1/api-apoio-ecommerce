@@ -37,7 +37,7 @@ import static org.mockito.BDDMockito.*;
 @WebMvcTest(ProdutoControlador.class)
 @Import({ ProdutoRepresentationAssembler.class })
 @TestInstance(Lifecycle.PER_CLASS)
-public class ProdutoControleTestes {
+class TestProdutoControle {
 	@MockBean
 	private ProdutoServico produtoServico;
 	private MockMvc mockMvc;
@@ -99,7 +99,7 @@ public class ProdutoControleTestes {
 		
 		given( produtoServico.salvar(pf) ).willReturn( pd );
 		
-		String url = "/api/produtos/";
+		String url = "/produtos/";
 		mockMvc.perform( post( url  )
 				.content( JsonUtil.asJsonString( pf ) )
 				.contentType(MediaType.APPLICATION_JSON)
@@ -114,7 +114,7 @@ public class ProdutoControleTestes {
 	public void testaRetorno200DeBuscaPorID() throws Exception {
 		given( produtoServico.buscarPorId(produto.getId()) ).willReturn(produtoRepresentation.toModel(produto));
 		
-		mockMvc.perform( get("/api/produtos/{id}", produto.getId()) )
+		mockMvc.perform( get("/produtos/{id}", produto.getId()) )
 			//.andDo(print())
 			.andExpect(status().isOk())
 			.andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -142,14 +142,14 @@ public class ProdutoControleTestes {
 				);
 
 		//String url = "/api/produtos?page=" + page + "&size=" + size;
-		mockMvc.perform(get("/api/produtos?page=1&size=2")
+		mockMvc.perform(get("/produtos?page=1&size=2")
 				.accept(MediaTypes.HAL_JSON_VALUE))
 			//	.andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$").doesNotExist());
 	}
 	/**
-	 * Testa o retorno exato da lista de produtos na chamada ao endpoint get:/api/proditos?page=x&size=x
+	 * Testa o retorno exato da lista de produtos na chamada ao endpoint get:/api/produtos?page=x&size=x
 	 * @throws Exception
 	 */
 	@Test
@@ -170,7 +170,7 @@ public class ProdutoControleTestes {
 				.build()
 				);
 
-		String url = "/api/produtos?page=" + page + "&size=" + size;
+		String url = "/produtos?page=" + page + "&size=" + size;
 		mockMvc.perform(get(url)
 				.accept(MediaTypes.HAL_JSON_VALUE))
 				//.andDo(print())
