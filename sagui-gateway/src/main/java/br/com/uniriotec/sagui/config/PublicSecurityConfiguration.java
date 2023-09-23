@@ -1,3 +1,4 @@
+/**
 package br.com.uniriotec.sagui.config;
 
 import org.springframework.context.annotation.Bean;
@@ -29,3 +30,4 @@ public class PublicSecurityConfiguration {
         return serverHttpSecurity.build();
     }
 }
+**/

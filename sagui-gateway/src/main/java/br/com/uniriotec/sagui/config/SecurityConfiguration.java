@@ -45,7 +45,12 @@ public class SecurityConfiguration {
     public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity serverHttpSecurity){
         serverHttpSecurity
                 .csrf().disable()
-                .authorizeExchange( exchange -> exchange
+                .authorizeExchange( exchange ->
+                        exchange.pathMatchers(  "/eureka/**","/eureka/web" ).permitAll()
+                                .pathMatchers("/webjars/swagger-ui/**").permitAll()
+                                .pathMatchers("/api/v3/api-docs/**").permitAll()
+                                .pathMatchers("/v3/api-docs/**").permitAll()
+                                .pathMatchers("/api/v3/api-docs/produtos").permitAll()
                         .anyExchange()
                         .authenticated()
                 )
