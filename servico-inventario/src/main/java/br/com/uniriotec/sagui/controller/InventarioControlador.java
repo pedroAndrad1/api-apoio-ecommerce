@@ -1,9 +1,11 @@
 package br.com.uniriotec.sagui.controller;
 
 import br.com.uniriotec.sagui.Repository.InventarioRepositorio;
-import br.com.uniriotec.sagui.model.Inventario;
+import br.com.uniriotec.sagui.model.dto.InventarioData;
+import br.com.uniriotec.sagui.model.dto.InventarioForm;
 import br.com.uniriotec.sagui.service.InventarioServico;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,7 +15,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("inventario")
-@CrossOrigin(origins = {"http://localhost:8080","http://localhost:3000"})
 public class InventarioControlador {
     @Autowired
     private InventarioServico inventarioServico;
@@ -30,10 +31,26 @@ public class InventarioControlador {
     public ResponseEntity<Long> emEstoque(@RequestParam List<String> skuCode){
         return ResponseEntity.status(HttpStatus.OK).body( inventarioServico.estaEmEstoque( skuCode ) );
     }
-    @GetMapping("/admin")
-    @Transactional(readOnly = true)
-    public ResponseEntity<List<Inventario>> todos(){
-        return ResponseEntity.status(HttpStatus.OK).body( ir.findAll() );
-    }
 
+    /**
+     * Retorna todos os itens de inventário
+     * @return
+     */
+    @GetMapping("/admin")
+    @ResponseStatus(HttpStatus.OK)
+    @Transactional(readOnly = true)
+    public CollectionModel<InventarioData> todos(){
+        return inventarioServico.retornaTodos();
+    }
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    @Transactional
+    public InventarioData salvar(@RequestBody InventarioForm inventarioForm){
+        return inventarioServico.inserirInventario(inventarioForm);
+    }
+    @PutMapping
+    @ResponseStatus(HttpStatus.OK)
+    public InventarioData alterar(@RequestBody InventarioForm inventarioForm){
+        return inventarioServico.atualizaInventario( inventarioForm );
+    }
 }
