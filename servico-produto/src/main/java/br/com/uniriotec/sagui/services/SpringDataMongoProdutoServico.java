@@ -44,7 +44,7 @@ public class SpringDataMongoProdutoServico implements ProdutoServico {
 	 * @return produto relacionado ao ID buscado
 	 * @exception ProdutoNaoEncontradoException caso o produto não seja encontrado
 	 */
-	@Cacheable(value="produtoCache", key="#id")
+//	@Cacheable(value="produtoCache", key="#id")
 	@Override
 	public ProdutoData buscarPorId(String id) {
 		log.info("Método foi chamado - get by id");
@@ -72,7 +72,7 @@ public class SpringDataMongoProdutoServico implements ProdutoServico {
 	 * @param size quantidade de itens por página
 	 * @return ProdutoRetornoPaginacao
 	 */
-	@Cacheable(value="produtoPaginadoCache")
+//	@Cacheable(value="produtoPaginadoCache")
 	@Override
 	public ProdutoRetornoPaginacao buscarTodosAtivosPaginavel(int page, int size){
 		log.info("Método foi chamado - find by ativo");
