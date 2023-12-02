@@ -10,18 +10,16 @@
         <relativePath /> <!-- lookup parent from repository -->
     </parent>
     <groupId>br.com.uniriotec.sagui</groupId>
-    <artifactId>sagui-parent</artifactId>
+    <artifactId>api-apoio-ecommerce</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <modules>
-        <module>sagui-gateway</module>
-        <module>sagui-historico-conversao</module>
+        <module>servico-gateway</module>
         <module>servico-configuracao</module>
         <module>servico-descoberta</module>
         <module>servico-produto</module>
         <module>servico-pedidos</module>
         <module>servico-inventario</module>
-        <module>servico-produto-sc</module>
     </modules>
 
     <properties>
