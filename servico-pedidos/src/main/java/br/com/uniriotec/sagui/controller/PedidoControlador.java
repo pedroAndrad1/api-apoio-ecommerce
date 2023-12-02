@@ -11,11 +11,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 @RestController
 @RequestMapping("/pedidos")
-@CrossOrigin
 public class PedidoControlador {
 
     private final PedidoRepositorio pedidoRepositorio;
@@ -32,9 +32,17 @@ public class PedidoControlador {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public CollectionModel<PedidoData> buscaPedido(Long id) {
+    public CollectionModel<PedidoData> buscaPedido() {
         List<Pedido> pedidos = pedidoRepositorio.findAll();
         return pedidoRepresentationAssembler.toCollectionModel(pedidos);
+    }
+
+    @GetMapping("/detalhe/{id}")
+    public Pedido buscaPedidoById(@RequestParam Long id){
+        Optional<Pedido> pedido = pedidoRepositorio.findById(id);
+
+        return pedido.get();
+
     }
 
     @PostMapping

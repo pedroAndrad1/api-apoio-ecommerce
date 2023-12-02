@@ -22,7 +22,7 @@ public class PedidoRepresentationAssembler implements RepresentationModelAssembl
                 .pedidoNumero(entity.getPedidoNumero() )
                 .linhaItemPedidoDataList( linhaItemPedidoRepresentationAssembler.toCollectionModel(entity.getLinhaItemPedidoList() ) )
                 .build()
-                .add( WebMvcLinkBuilder.linkTo( methodOn( PedidoControlador.class ).buscaPedido(entity.getId()) ).withSelfRel() );
+                .add( WebMvcLinkBuilder.linkTo( methodOn( PedidoControlador.class ).buscaPedido()).withSelfRel() );
     }
 
     @Override
