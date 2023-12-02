@@ -1,1 +1,1 @@
-# sagui-parent
+# API de apoio ao e-commerce
