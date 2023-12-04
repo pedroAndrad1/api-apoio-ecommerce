@@ -8,6 +8,8 @@ import org.springframework.hateoas.server.RepresentationModelAssembler;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
+
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @Component
@@ -21,6 +23,7 @@ public class PedidoRepresentationAssembler implements RepresentationModelAssembl
                 .id( entity.getId() )
                 .pedidoNumero(entity.getPedidoNumero() )
                 .linhaItemPedidoDataList( linhaItemPedidoRepresentationAssembler.toCollectionModel(entity.getLinhaItemPedidoList() ) )
+                .createdAt(LocalDateTime.now())
                 .build()
                 .add( WebMvcLinkBuilder.linkTo( methodOn( PedidoControlador.class ).buscaPedido()).withSelfRel() );
     }
@@ -34,9 +37,10 @@ public class PedidoRepresentationAssembler implements RepresentationModelAssembl
         Pedido pedido = Pedido.builder()
                             .id( pedidoData.getId() )
                             .pedidoNumero(pedidoData.getPedidoNumero() )
+                            .createdAt(LocalDateTime.now())
                             //.linhaItemPedidoList( linhaItemPedidoRepresentationAssembler.mapToPersistenseCollection( pedidoData.getLinhaItemPedidoDataList() ) )
                             .build();
-        //pedido.setLinhaItemPedidoList( linhaItemPedidoRepresentationAssembler.mapToPersistenseCollection( pedidoData.getLinhaItemPedidoDataList(), pedido ) );
+//        pedido.setLinhaItemPedidoList( linhaItemPedidoRepresentationAssembler.mapToPersistenseCollection( pedidoData.getLinhaItemPedidoDataList(), pedido ) );
         return pedido;
     }
 }

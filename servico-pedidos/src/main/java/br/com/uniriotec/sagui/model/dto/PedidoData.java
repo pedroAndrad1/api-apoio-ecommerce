@@ -18,7 +18,5 @@ public class PedidoData extends RepresentationModel<PedidoData> {
     private Long id;
     @Getter private String pedidoNumero;
     @Getter private CollectionModel<LinhaItemPedidoData> linhaItemPedidoDataList;
-    @Getter
-    @CreationTimestamp
-    private LocalDateTime createdAt;
+    @Getter private LocalDateTime createdAt;
 }

@@ -42,6 +42,7 @@ public class SpringDataPedidoServico implements PedidoServico {
     @TimeLimiter( name = SALVAR_PEDIDO_CB_NOME )
     @Retry( name = SALVAR_PEDIDO_CB_NOME )
     public CompletableFuture<PedidoData> salvarPedido(PedidoData pedidoData){
+        System.out.println(pedidoData);
         //Transforma pedidoData em classe anotada para persistencia pedido
         Pedido pedido = pedidoRepresentationAssembler.mapToPersistence(pedidoData);
         pedido.setLinhaItemPedidoList( itemPedidoRepresentationAssembler.mapToPersistenseCollection( pedidoData.getLinhaItemPedidoDataList(), pedido ) );
@@ -70,8 +71,17 @@ public class SpringDataPedidoServico implements PedidoServico {
         final PedidoData pedidoDataCF = pedidoRepresentationAssembler.toModel(pedido);
         return CompletableFuture.supplyAsync( () -> pedidoDataCF) ;
     }
+//    @Override
+//    @CircuitBreaker(name = SALVAR_PEDIDO_CB_NOME, fallbackMethod = "pedidosFallBack")
+//    @TimeLimiter( name = SALVAR_PEDIDO_CB_NOME )
+//    @Retry( name = SALVAR_PEDIDO_CB_NOME )
+//    public CompletableFuture<Pedido> salvarPedido2(Pedido pedido){
+//
+//    }
     @Override
     public CompletableFuture<PedidoData> pedidosFallBack(PedidoData pedidoData, RuntimeException runtimeException){
+        System.out.println("Excessão:");
+        System.out.println(runtimeException.getCause());
         pedidoData.setPedidoNumero("Erro, não foi possível registrar o pedido, tente novamente.");
         final PedidoData pedidoDataCF = pedidoData;
         return  CompletableFuture.supplyAsync(( ) -> pedidoDataCF);

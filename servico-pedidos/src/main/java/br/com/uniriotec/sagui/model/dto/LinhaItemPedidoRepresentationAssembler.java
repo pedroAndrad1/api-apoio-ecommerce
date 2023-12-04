@@ -6,7 +6,9 @@ import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
 import org.springframework.stereotype.Component;
 
+import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 
@@ -15,7 +17,6 @@ public class LinhaItemPedidoRepresentationAssembler implements RepresentationMod
     @Override
     public LinhaItemPedidoData toModel(LinhaItemPedido entity) {
         return LinhaItemPedidoData.builder()
-                .id( entity.getId() )
                 .codigoSku( entity.getCodigoSku() )
                 .quantidade( entity.getQuantidade() )
                 .preco( entity.getPreco() )
@@ -30,7 +31,6 @@ public class LinhaItemPedidoRepresentationAssembler implements RepresentationMod
     }
     public LinhaItemPedido mapToPersistense( LinhaItemPedidoData linhaItemPedidoData, Pedido pedido){
         return LinhaItemPedido.builder()
-                .id(linhaItemPedidoData.getId())
                 .codigoSku(linhaItemPedidoData.getCodigoSku())
                 .quantidade(linhaItemPedidoData.getQuantidade())
                 .preco(linhaItemPedidoData.getPreco())

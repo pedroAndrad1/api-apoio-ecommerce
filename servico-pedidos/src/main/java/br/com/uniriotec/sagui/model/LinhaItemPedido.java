@@ -4,6 +4,8 @@ import lombok.*;
 
 import jakarta.persistence.*;
 import java.math.BigDecimal;
+import java.util.Date;
+import java.util.UUID;
 
 @Builder
 @NoArgsConstructor
@@ -11,10 +13,10 @@ import java.math.BigDecimal;
 @Entity
 @Table(name="linha_item_pedido_tabela")
 public class LinhaItemPedido {
+//    @Id
+//    @Column(name = "linha_item_pedido_id")
+//    @Getter private String id;
     @Id
-    @GeneratedValue( strategy = GenerationType.IDENTITY )
-    @Column(name = "linha_item_pedido_id")
-    @Getter private Long id;
     @Column(name = "codigo_sku", nullable = false)
     @Getter private String codigoSku;
     @Column(name = "preco")

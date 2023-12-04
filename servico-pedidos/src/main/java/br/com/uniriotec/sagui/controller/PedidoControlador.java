@@ -48,6 +48,7 @@ public class PedidoControlador {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public CompletableFuture<PedidoData> geraPedido(@RequestBody PedidoData pedidoData){
+
         return pedidoServico.salvarPedido(pedidoData);
     }
 
